@@ -26,7 +26,5 @@ rm norm.wav
 rm silent.mov
 rm vol.txt
 
-say wuut! video normalized and encoded
-
 echo "$(tput setaf 2)wOOt!!! Video normalized and encoded $(tput sgr0)"
 
