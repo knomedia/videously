@@ -103,5 +103,3 @@ You can resize the video passing in the `-s` options with values such as "1024x6
 
 Some helpful stuff at: [http://rodrigopolo.com/ffmpeg/cheats.html](http://rodrigopolo.com/ffmpeg/cheats.html)
 
-
-
