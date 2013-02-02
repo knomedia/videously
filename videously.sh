@@ -1,55 +1,81 @@
 #!/bin/bash
 
-input_file=$1
-raw_file="web_normalized_$input_file"
-output_file="${raw_file%.*}.mp4"
 
+if [ ! -z "$1" ]
+then
+  input_file=$1
+else
+  echo "$(tput setaf 1)Sorry my friend. I need at least one file to work with.$(tput sgr0)"
+  echo ""
+  echo "****************************************"
+  echo "videously <input_file> [output_file]"
+  echo "****************************************"
+  echo ""
+  echo "<input_file> file you want to process"
+  echo "[output_file] (optional) name to save the new file as"
+  echo ""
+  exit
+fi
+
+if [ ! -z "$2" ]
+then
+  output_file=$2
+else
+  raw_file="web_normalized_$input_file"
+  output_file="${raw_file%.*}.mp4"
+fi
 
 function welcome() {
-  echo "$(tput setaf 2)Welcome to the wonderful world of automation. $(tput sgr0)"
-  echo "$(tput setaf 2)Splitting audio and video for processing...$(tput sgr0)"
+  echo ""
+  echo "$(tput setaf 6)#############################################################"
+  echo "   Hey Buddy!!! Welcome to videously."
+  echo "#############################################################$(tput sgr0)"
 }
 
 function split_streams() {
+  echo "$(tput setaf 2)...Splitting audio and video for processing$(tput sgr0)"
   ffmpeg -i $input_file -c:a pcm_s16le -vn -loglevel panic audio.wav
   ffmpeg -i $input_file -c:v copy -y -loglevel panic silent.mov
 }
 
 
 function normalize_audio() {
-  echo "$(tput setaf 2)Analyzing audio track for peak volume...$(tput sgr0)"
+  echo "$(tput setaf 2)...Analyzing audio track for peak volume$(tput sgr0)"
   sox audio.wav -n stat -v 2> vol.txt
   vol=`cat vol.txt`
 
-  echo "$(tput setaf 2)Processing audio file with a $vol percent boost...$(tput sgr0)"
+  echo "$(tput setaf 2)...Processing audio file by factor of $vol $(tput sgr0)"
   sox -v "$vol" audio.wav norm.wav
 }
 
 function recompile_audio_video() {
-  echo "$(tput setaf 2)Encoding H.264 qt-faststart file...(this could take a while)$(tput sgr0)"
-  ffmpeg -i silent.mov -i norm.wav -c:v libx264 -preset slow -profile:v main -c:a libfaac -movflags +faststart -loglevel info $1
+  echo "$(tput setaf 2)...Encoding H.264 qt-faststart file...(this could take a while)$(tput sgr0)"
+  ffmpeg -i silent.mov -i norm.wav -c:v libx264 -preset slow -profile:v main -c:a libfaac -movflags +faststart -loglevel panic $1
 }
 
 function remove_trash() {
-  echo "$(tput setaf 2)Cleaning up...$(tput sgr0)"
+  echo "$(tput setaf 2)...Cleaning up$(tput sgr0)"
   rm audio.wav
   rm norm.wav
   rm silent.mov
   rm vol.txt
 }
 
-function print_file_size() {
+function print_stats() {
   og_size=`ls -nl $1 | awk '{print $5'}`
   new_size=`ls -nl $2 | awk '{print $5'}`
   savings=$(($og_size - $new_size ))
   percent=$(echo "scale=2; (1-($new_size/$og_size))*100.0" | bc)
   mb=$(echo "scale=2; $savings/1048576.0" | bc) #number is 1024^2
-  echo "$(tput setaf 2)Shrunk $1 $mb MB ($percent %)$(tput sgr0)"
+
+  echo "$(tput setaf 6)#############################################################"
+  echo "$2 is $mb MB ($percent %) smaller"
+  echo "Volume was increased by a factor of $vol"
+  echo "#############################################################$(tput sgr0)"
 }
  
 function notify_complete() {
-  echo "$(tput setaf 2)wOOt!!! Video normalized and encoded"
-  echo "Presenting to you: $output_file$(tput sgr0)"
+  echo "$(tput setaf 2)...wOOt!!!"
 }
 
 welcome
@@ -59,5 +85,5 @@ normalize_audio
 recompile_audio_video $output_file
 remove_trash
 notify_complete
-print_file_size $input_file $output_file
+print_stats $input_file $output_file
 
