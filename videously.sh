@@ -45,12 +45,13 @@ function normalize_audio() {
   vol=`cat vol.txt`
 
   echo "$(tput setaf 2)...Processing audio file by factor of $vol $(tput sgr0)"
-  sox --norm audio.wav norm.wav
+  sox --norm -G audio.wav norm.wav
+
 }
 
 function recompile_audio_video() {
   echo "$(tput setaf 2)...Encoding H.264 qt-faststart file...(this could take a while)$(tput sgr0)"
-  ffmpeg -i silent.mov -i norm.wav -c:v libx264 -preset slow -profile:v main -c:a libfaac -movflags +faststart -loglevel panic $1
+  ffmpeg -i silent.mov -i norm.wav -map 0:0 -map 1:0 -c:v libx264 -preset slow -profile:v main -c:a libfaac -movflags +faststart -loglevel panic $1
 }
 
 function remove_trash() {
