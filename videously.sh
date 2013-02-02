@@ -1,7 +1,9 @@
 #!/bin/bash
 
 input_file=$1
-output_file="web_normalized_$input_file"
+raw_file="web_normalized_$input_file"
+output_file="${raw_file%.*}.mp4"
+
 
 function welcome() {
   echo "$(tput setaf 2)Welcome to the wonderful world of automation. $(tput sgr0)"
@@ -24,8 +26,8 @@ function normalize_audio() {
 }
 
 function recompile_audio_video() {
-  echo "$(tput setaf 2)Encoding H.264 qt-faststart file...$(tput sgr0)"
-  ffmpeg -i silent.mov -i norm.wav -map 0:0 -map 1:0 -c:v libx264 -preset slow -profile:v main -c:a libfaac -movflags +faststart -loglevel info $1
+  echo "$(tput setaf 2)Encoding H.264 qt-faststart file...(this could take a while)$(tput sgr0)"
+  ffmpeg -i silent.mov -i norm.wav -c:v libx264 -preset slow -profile:v main -c:a libfaac -movflags +faststart -loglevel info $1
 }
 
 function remove_trash() {
@@ -46,7 +48,8 @@ function print_file_size() {
 }
  
 function notify_complete() {
-  echo "$(tput setaf 2)wOOt!!! Video normalized and encoded $(tput sgr0)"
+  echo "$(tput setaf 2)wOOt!!! Video normalized and encoded"
+  echo "Presenting to you: $output_file$(tput sgr0)"
 }
 
 welcome
