@@ -24,9 +24,22 @@ It appears that the most recent brew recipe for ffmpeg now includes the needed x
 ## Usage
 
 ```bash
-$ ./videously <video_file>
+$ ./videously.sh <video_file> <output_file>
 ```
-Simply execute the script and give it a video to work from. Videosly is non-destructive to your original file. It will create the copies it needs and output a normalized web streaming file based on your given file.
+Simply execute the script and give it a video to work from. Videosly is non-destructive to your original file. It will create the copies it needs and output a normalized web streaming file based on your given file. The `<output_file>` name is completly optional. If you supply it, videously will use that name for the file it creates. Without the `<output_file>` it simply prepends `"web_normalized_"` to the beginning of the file name used as input.
+
+### Making videously globaly available
+I generally put tools like this in `/usr/local/bin`. When I do so, I typically drop the ".sh" from the name for a bash script like this. You can keep the file where you like. FWIW, it would move it like so:
+
+```bash
+$ mv videously.sh /usr/local/bin/videously
+```
+
+Doing so allows me to accesses it from any directory like:
+
+```bash
+$ videously <input_file> <output_file>
+``` 
 
 ## Tweaking / building your own
 While videously works well for my workflow, your results may vary. The following are notes on how to interact with both `ffmpeg` and `sox` for use in tweaking or better understanding what videously is doing.
