@@ -8,6 +8,19 @@ Currently videously uses the Main profile for H.264. This profile will run in mo
 * [`ffmpeg`](http://ffmpeg.org/). Make sure you install with H.264 (libx264) and AAC (libfaac) encoders
 * [`sox`](http://sox.sourceforge.net/). For normalizing the audio
 
+### Mac OS X / Homebrew users
+Installing on Mac OS X for Homebrew users should be pretty easy:
+
+```bash
+$ brew install ffmpeg
+```
+
+```bash
+$ brew install sox
+```
+
+It appears that the most recent brew recipe for ffmpeg now includes the needed x264 library for H.264 encoding.
+
 ## Usage
 
 ```bash
