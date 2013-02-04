@@ -41,6 +41,13 @@ Doing so allows me to accesses it from any directory like:
 $ videously <input_file> <output_file>
 ``` 
 
+### TODOS
+
+1. Build progress indicator for H.264 encoding (it can take a while on large vids)
+2. Put all temporarily generated files into a sub directory so as to not clutter the main directory.
+3. Add feature wherein a directory of files could be processed
+
+
 ## Tweaking / building your own
 While videously works well for my workflow, your results may vary. The following are notes on how to interact with both `ffmpeg` and `sox` for use in tweaking or better understanding what videously is doing.
 
