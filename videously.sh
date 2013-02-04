@@ -45,8 +45,7 @@ function normalize_audio() {
   vol=`cat vol.txt`
 
   echo "$(tput setaf 2)...Processing audio file by factor of $vol $(tput sgr0)"
-  sox -G --norm audio.wav norm.wav
-
+  sox -v $vol -G audio.wav norm.wav
 }
 
 function recompile_audio_video() {
