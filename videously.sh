@@ -35,7 +35,7 @@ function welcome() {
 function split_streams() {
   echo "$(tput setaf 2)...Splitting audio and video for processing$(tput sgr0)"
   ffmpeg -i $input_file -c:a pcm_s16le -vn -loglevel panic audio.wav
-  ffmpeg -i $input_file -c:v copy -y -loglevel panic silent.mov
+  ffmpeg -i $input_file -vcodec copy -an -loglevel panic silent.mov
 }
 
 
@@ -64,7 +64,7 @@ function remove_trash() {
 function print_stats() {
   og_size=`ls -nl $1 | awk '{print $5'}`
   new_size=`ls -nl $2 | awk '{print $5'}`
-  savings=$(($og_size - $new_size ))
+  savings=$(($og_size - $new_size))
   percent=$(echo "scale=2; (1-($new_size/$og_size))*100.0" | bc)
   mb=$(echo "scale=2; $savings/1048576.0" | bc) #number is 1024^2
 
@@ -87,4 +87,3 @@ recompile_audio_video $output_file
 remove_trash
 notify_complete
 print_stats $input_file $output_file
-
