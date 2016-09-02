@@ -1,29 +1,69 @@
 #!/bin/bash
 
-
-if [ ! -z "$1" ]
-then
-  input_file=$1
-else
-  echo "$(tput setaf 1)Sorry my friend. I need at least one file to work with.$(tput sgr0)"
+function usage() {
+  echo "$(tput setaf 1)Need at least an input file to work with.$(tput sgr0)"
   echo ""
   echo "****************************************"
-  echo "videously <input_file> [output_file]"
+  echo "videously [-a] <input_file> [output_file]"
   echo "****************************************"
   echo ""
   echo "<input_file> file you want to process"
   echo "[output_file] (optional) name to save the new file as"
+  echo "adding the -a (audio-only) flag will normalize and convert audio, but apply it back to the same video container without re-encoding"
   echo ""
-  exit
+  exit 2
+}
+
+AUDIO_ONLY="false"
+# Use -gt 1 to consume two arguments per pass in the loop (e.g. each
+# argument has a corresponding value to go with it).
+# Use -gt 0 to consume one or more arguments per pass in the loop (e.g.
+# some arguments don't have a corresponding value to go with it such
+# as in the --default example).
+while [[ $# -gt 1 ]]
+do
+  key="$1"
+
+  case $key in
+    -i|--input)
+      INPUT_FILE="$2"
+      shift # past argument
+      ;;
+    -o|--output)
+      OUTPUT_FILE="$2"
+      shift # past argument
+      ;;
+    -a|--audio-only)
+      AUDIO_ONLY="true"
+      #shift # past argument
+      ;;
+    --default)
+      DEFAULT=YES
+      ;;
+    *)
+      # unknown option
+      ;;
+  esac
+  shift # past argument or value
+done
+
+
+if [ ! ${OUTPUT_FILE} ]; then
+  raw_file="web_normalized_$INPUT_FILE"
+  OUTPUT_FILE="${raw_file%.*}.mp4"
+  if [[ "${AUDIO_ONLY}" == "true" ]]; then
+    raw_file="normalized_$INPUT_FILE"
+    OUTPUT_FILE="${raw_file}"
+  fi
 fi
 
-if [ ! -z "$2" ]
-then
-  output_file=$2
-else
-  raw_file="web_normalized_$input_file"
-  output_file="${raw_file%.*}.mp4"
+if [[ ! ${INPUT_FILE} ]]; then
+  usage
 fi
+if [[ ! ${OUTPUT_FILE} ]]; then
+  usage
+fi
+
 
 function welcome() {
   echo ""
@@ -34,8 +74,8 @@ function welcome() {
 
 function split_streams() {
   echo "$(tput setaf 2)...Splitting audio and video for processing$(tput sgr0)"
-  ffmpeg -i $input_file -c:a pcm_s16le -vn -loglevel panic audio.wav
-  ffmpeg -i $input_file -vcodec copy -an -loglevel panic silent.mov
+  ffmpeg -i $INPUT_FILE -c:a pcm_s16le -vn -loglevel panic audio.wav
+  ffmpeg -i $INPUT_FILE -vcodec copy -an -loglevel panic silent.mov
 }
 
 
@@ -48,9 +88,14 @@ function normalize_audio() {
   sox -v $vol -G audio.wav norm.wav
 }
 
-function recompile_audio_video() {
+function encode_video_audio() {
   echo "$(tput setaf 2)...Encoding H.264 qt-faststart file...(this could take a while)$(tput sgr0)"
   ffmpeg -i silent.mov -i norm.wav -map 0:0 -map 1:0 -c:v libx264 -preset slow -profile:v main -c:a aac -movflags +faststart -loglevel panic $1
+}
+
+function merge_video_audio() {
+  echo "$(tput setaf 2)...Merging normalized audio with video...(this could take a while)$(tput sgr0)"
+  ffmpeg -i silent.mov -i norm.wav -map 0:v -map 1:a -c:v copy -c:a aac -loglevel panic $1
 }
 
 function remove_trash() {
@@ -83,7 +128,14 @@ welcome
 
 split_streams
 normalize_audio
-recompile_audio_video $output_file
+
+if [[ "${AUDIO_ONLY}" == "true" ]];
+then
+  merge_video_audio $OUTPUT_FILE
+else
+  encode_video_audio $OUTPUT_FILE
+fi
+
 remove_trash
 notify_complete
-print_stats $input_file $output_file
+print_stats $INPUT_FILE $OUTPUT_FILE

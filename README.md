@@ -1,8 +1,13 @@
 # videously 
 
-Videously is a bash script that relies on `ffmpeg` and `sox` to prepare videos for web delivery. It will normalize the audio within the video container as well as encode the video as an MP4, H.264 video ready for streaming in most browsers and Flash. (Mozilla will still require an Ogg Vorbis, or WebM video... This script does not deal with that).
+Videously is a bash script that relies on `ffmpeg` and `sox` to prepare videos
+for web delivery. It will normalize the audio within the video container as
+well as encode the video as an MP4, H.264 video ready for streaming in most
+browsers (see [caniuse.com](http://caniuse.com/#feat=mpeg4) for details) and Flash.
 
-Currently videously uses the Main profile for H.264. This profile will run in most browsers (Firefox excluding), Flash Player, and iOS devices. Older iOS devices actually require the `baseline` profile.
+videously uses the Main profile for H.264. This profile will run in most
+browsers, Flash Player, and iOS devices. Really old iOS devices require the
+`baseline` profile.
 
 ## Dependencies
 * [`ffmpeg`](http://ffmpeg.org/). Make sure you install with H.264 (libx264) and AAC (libfaac) encoders
@@ -24,12 +29,34 @@ It appears that the most recent brew recipe for ffmpeg now includes the needed x
 ## Usage
 
 ```bash
-$ ./videously.sh <video_file> <output_file>
+$ ./videously.sh -i <video_file> -o <output_file>
 ```
-Simply execute the script and give it a video to work from. Videosly is non-destructive to your original file. It will create the copies it needs and output a normalized web streaming file based on your given file. The `<output_file>` name is completly optional. If you supply it, videously will use that name for the file it creates. Without the `<output_file>` it simply prepends `"web_normalized_"` to the beginning of the file name used as input.
+Simply execute the script and give it a video to work from. Videosly is
+non-destructive to your original file. It will create the copies it needs and
+output a normalized web streaming file based on your given file. The
+`<output_file>` name is optional. If you supply it, videously will
+use that name for the file it creates. Without the `<output_file>` it simply
+prepends `"web_normalized_"` to the beginning of the file name used as input.
+
+
+### Audio Normalization Only
+
+Passing a `-a` flag will normalize the audio within your video and create a new
+video with the existing video encoding and the new normalized audio. If you
+know that video will be processed later by another encoding system, this will
+allow you to get normalized audio, without multiple video encodings.
+
+For example
+
+```bash
+./videously.sh -a -i source.mov
+```
+
 
 ### Making videously globaly available
-I generally put tools like this in `/usr/local/bin`. When I do so, I typically drop the ".sh" from the name for a bash script like this. You can keep the file where you like. FWIW, it would move it like so:
+I generally put tools like this in `/usr/local/bin`. When I do so, I typically
+drop the ".sh" from the name for a bash script like this. You can keep the file
+where you like. FWIW, it would move it like so:
 
 ```bash
 $ mv videously.sh /usr/local/bin/videously
@@ -38,8 +65,8 @@ $ mv videously.sh /usr/local/bin/videously
 Doing so allows me to accesses it from any directory like:
 
 ```bash
-$ videously <input_file> <output_file>
-``` 
+$ videously -i <input_file> -o <output_file>
+```
 
 ### TODOS
 
@@ -49,7 +76,9 @@ $ videously <input_file> <output_file>
 
 
 ## Tweaking / building your own
-While videously works well for my workflow, your results may vary. The following are notes on how to interact with both `ffmpeg` and `sox` for use in tweaking or better understanding what videously is doing.
+While videously works well for my workflow, your results may vary. The
+following are notes on how to interact with both `ffmpeg` and `sox` for use in
+tweaking or better understanding what videously is doing.
 
 ### Normalize Audio for video files
 Notes for creating a shell script to normalize sound in videos
